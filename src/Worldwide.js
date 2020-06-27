@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Doughnut, Radar, Bar, Polar} from 'react-chartjs-2';
-import style from './App.css'
+import './App.css'
 
 
 
@@ -8,8 +8,6 @@ function Worldwide() {
   const [confirmed, setConfirmed] = useState();
   const [recovered, setRecovered] = useState();
   const [deaths, setDeaths] = useState();
-  const [cases, setCases] = useState([]);
-  const [dates, setDates] = useState([]);
   const [start, setStart] = useState([]);
   const [end, setEnd] = useState([]);
   const [revisedDates, setRevisedDates]  = useState([]);
@@ -91,8 +89,6 @@ const dataOptionsDisplay = {
       'Recovered'
     ]
   };
-
-
   const dataBar = {
 
     labels: revisedDates,
@@ -107,11 +103,9 @@ const dataOptionsDisplay = {
       }
     ]
   };
-  console.log(cases[0]);
 
+  
   useEffect(()=>{
-
-    dataRange();
     fetch("https://covid19.mathdro.id/api")
     .then((res)=>{
       return res.json()
@@ -130,8 +124,6 @@ const dataOptionsDisplay = {
     .then((res)=>{
       console.log(res);
       let dateArray = res.map(val => val.reportDate);
-        setCases(res.map(val => val.deltaConfirmed));
-        setDates(dateArray);
         setRevisedDates(dateArray)
         setRevisedCases(res.map(val => val.deltaConfirmed))
     }
@@ -140,38 +132,31 @@ const dataOptionsDisplay = {
   }, [])
 
   useEffect(()=>{
-    dataRange();
-  },[start, end])
-  
-  function startChange(date){
-    setStart([...dates].indexOf(date.target.value)+1);
-  }
-
-  function endChange(date){
-    setEnd([...dates].indexOf(date.target.value)+1);
-  }
-
-
-  function dataRange(){
-    console.log(" start:" +start + " end:" + end);
+    //console.log(" start:" +start + " end:" + end);
     let tempArray;
     let tempArray2;
     if(start==''){
-      tempArray = [...dates].splice(0,end);
-      tempArray2 = [...cases].splice(0,end);
+      tempArray = [...revisedDates].splice(0,end);
+      tempArray2 = [...revisedCases].splice(0,end);
     }else if(end==''){
-      tempArray = [...dates].splice(start-1);
-      tempArray2 = [...cases].splice(start-1);
+      tempArray = [...revisedDates].splice(start-1);
+      tempArray2 = [...revisedCases].splice(start-1);
     }else{
-      tempArray = [...dates].splice(start-1).splice(0,(end-start+1));
-      tempArray2 = [...cases].splice(start-1).splice(0,(end-start+1));
+      tempArray = [...revisedDates].splice(start-1).splice(0,(end-start+1));
+      tempArray2 = [...revisedCases].splice(start-1).splice(0,(end-start+1));
     }
 
     setRevisedDates(tempArray);
     setRevisedCases(tempArray2);
-
+  },[start, end])
+  
+  function startChange(date){
+    setStart([...revisedDates].indexOf(date.target.value)+1);
   }
 
+  function endChange(date){
+    setEnd([...revisedDates].indexOf(date.target.value)+1);
+  }
 
   return (
     <div id="Main-Container">
@@ -227,14 +212,14 @@ const dataOptionsDisplay = {
         <div id="Date-Select-Box">
           <h4>Date Selector</h4>
         <select onChange={startChange}>
-          {dates.map((res, i)=>(
-            i===(0) ? <option selected value={res}>{res}</option> : <option value={res}>{res}</option>
+          {revisedDates.map((res, i)=>(
+            i===0 ? <option selected value={res}>{res}</option> : <option value={res}>{res}</option>
           ))}
         </select>
         <span style={{padding:"0 5px"}}>to</span>
         <select onChange={endChange}>
-          {dates.map((res, i)=>(
-            i===(dates.length-1) ? <option selected value={res}>{res}</option> : <option value={res}>{res}</option>
+          {revisedDates.map((res, i)=>(
+            i===(revisedDates.length-1) ? <option selected value={res}>{res}</option> : <option value={res}>{res}</option>
           ))}
         </select>
         </div>

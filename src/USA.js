@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Doughnut, Radar, Bar, Polar} from 'react-chartjs-2';
-import style from './App.css'
+import  './App.css'
 
 
 
@@ -8,8 +8,6 @@ function USA() {
   const [confirmed, setConfirmed] = useState();
   const [recovered, setRecovered] = useState();
   const [deaths, setDeaths] = useState();
-  const [cases, setCases] = useState([]);
-  const [dates, setDates] = useState([]);
 
   const data = {
     datasets: [{

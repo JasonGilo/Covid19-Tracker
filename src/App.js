@@ -1,7 +1,6 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { BrowserRouter as Router , Route, Switch } from "react-router-dom";
-import { Doughnut, Radar, Bar, Polar} from 'react-chartjs-2';
-import style from './App.css'
+import './App.css'
 import Information from './Information'
 import Worldwide from './Worldwide'
 import Nav from './Nav'

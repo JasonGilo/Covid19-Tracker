@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import Know from './know.png'
 import Spread from './spread.png'
 import Protect from './protect.png'

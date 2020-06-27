@@ -1,10 +1,10 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 
 function Footer() {
-    function getCurrentYear(){
-        var year = new Date();
-        return year.getFullYear();
-    }
+    // function getCurrentYear(){
+    //     var year = new Date();
+    //     return year.getFullYear();
+    // }
 
 
     var style = {
