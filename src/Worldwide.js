@@ -8,10 +8,12 @@ function Worldwide() {
   const [confirmed, setConfirmed] = useState();
   const [recovered, setRecovered] = useState();
   const [deaths, setDeaths] = useState();
-  const [start, setStart] = useState([]);
-  const [end, setEnd] = useState([]);
+  const [start, setStart] = useState();
+  const [end, setEnd] = useState();
   const [revisedDates, setRevisedDates]  = useState([]);
   const [revisedCases, setRevisedCases]  = useState([]);
+  const [dates , setDates] = useState([]);
+  const [dateErrorBoolean, setDateErrorBoolean] = useState(false);
 
   const data = {
     datasets: [{
@@ -58,6 +60,7 @@ const dataOptionsDisplay = {
     labels: ['Confirmed', 'Deaths', 'Recovered'],
     datasets: [
       {
+        label: '# of cases',
         backgroundColor: 'rgba(179,181,198,0.2)',
         borderColor: 'rgba(179,181,198,.4)',
         pointBackgroundColor: ['#FF6384','#FFCE56','#4BC0C0'],
@@ -71,6 +74,11 @@ const dataOptionsDisplay = {
 
 
   const dataPolar = {
+    labels: [
+      'Confirmed',
+      'Deaths',
+      'Recovered'
+    ],
     datasets: [{
       data: [
         confirmed, deaths, recovered
@@ -83,11 +91,7 @@ const dataOptionsDisplay = {
         '#36A2EB'
       ],
     }],
-    labels: [
-      'Confirmed',
-      'Deaths',
-      'Recovered'
-    ]
+   
   };
   const dataBar = {
 
@@ -126,37 +130,91 @@ const dataOptionsDisplay = {
       let dateArray = res.map(val => val.reportDate);
         setRevisedDates(dateArray)
         setRevisedCases(res.map(val => val.deltaConfirmed))
+        setDates(dateArray);
     }
 
     )
   }, [])
 
+
   useEffect(()=>{
-    //console.log(" start:" +start + " end:" + end);
-    let tempArray;
-    let tempArray2;
-    if(start==''){
-      tempArray = [...revisedDates].splice(0,end);
-      tempArray2 = [...revisedCases].splice(0,end);
-    }else if(end==''){
-      tempArray = [...revisedDates].splice(start-1);
-      tempArray2 = [...revisedCases].splice(start-1);
-    }else{
-      tempArray = [...revisedDates].splice(start-1).splice(0,(end-start+1));
-      tempArray2 = [...revisedCases].splice(start-1).splice(0,(end-start+1));
+    fetch("https://covid19.mathdro.id/api/daily")
+    .then((res)=>{
+      return res.json()
+    })
+    .then((res)=>{
+      var startIndex, endIndex;
+      res.find((obj, i)=> {
+        if(obj.reportDate===start){
+          startIndex = i;
+        }
+        if(obj.reportDate===end){
+          endIndex = i;
+        }
+      })
+      res = res.slice(startIndex, endIndex)
+
+      setRevisedDates(res.map(objDate =>{
+        return objDate.reportDate;
+      }))
+      setRevisedCases(res.map(val => val.deltaConfirmed))
+
     }
 
-    setRevisedDates(tempArray);
-    setRevisedCases(tempArray2);
-  },[start, end])
-  
-  function startChange(date){
-    setStart([...revisedDates].indexOf(date.target.value)+1);
-  }
+    )
+  }, [start, end])
 
-  function endChange(date){
-    setEnd([...revisedDates].indexOf(date.target.value)+1);
-  }
+   function startChange(date){
+     var startDate = new Date(date.target.value);
+     var endDate = new Date(end);
+     if(end===undefined){
+       endDate = new Date(dates[dates.length-1])
+     }
+
+     if(startDate <= endDate){
+      setStart(date.target.value);
+      setDateErrorBoolean(false);
+     }else{
+      setDateErrorBoolean(true);
+    }
+    
+   }
+
+   function endChange(date){
+    var startDate = new Date(start);
+    var endDate = new Date(date.target.value);
+    if(start===undefined){
+      startDate = new Date(dates[0]);
+    }
+     if(startDate <= endDate){
+      setEnd(date.target.value);
+      setDateErrorBoolean(false);
+     }else{
+       setDateErrorBoolean(true);
+     }
+   }
+
+
+   function dateError(){
+     return(
+       <div style={{position: 'absolute', top:'50%', left:'50%', transform: 'translate(-50%, -50%)',
+       width:'250px',
+       height:'175px',
+       backgroundColor:'rgba(0,0,0,.5)',
+       borderRadius:'5%',
+       }}>
+         <div style={{color:'white', padding:'15px', textAlign:'center'}}>
+          <h3 style={{fontSize:'42px', marginBottom:'0px', marginTop:'0px',borderBottom:'3px solid white'}}>
+            Error
+          </h3>
+          <p style={{fontSize:'18px', marginBottom:'0px', marginTop:'5px'}}>
+            You have entered an invalid date selection. Make sure the start and end dates overlap.
+          </p>
+          </div>
+        </div>
+     )
+   }
+
 
   return (
     <div id="Main-Container">
@@ -206,20 +264,21 @@ const dataOptionsDisplay = {
       </div>
       </div>
       </div>
-      <div id="Bar-Graph-Global">
+      <div id="Bar-Graph-Global" style={{position:'relative'}}>
+        {dateErrorBoolean && dateError()}
         <div id="Title-Date-Box">
         <h3>Daily Confirmed Cases</h3>
         <div id="Date-Select-Box">
           <h4>Date Selector</h4>
         <select onChange={startChange}>
-          {revisedDates.map((res, i)=>(
-            i===0 ? <option selected value={res}>{res}</option> : <option value={res}>{res}</option>
+          {dates.map((res, i)=>(
+           <option value={res}>{res}</option>
           ))}
         </select>
         <span style={{padding:"0 5px"}}>to</span>
         <select onChange={endChange}>
-          {revisedDates.map((res, i)=>(
-            i===(revisedDates.length-1) ? <option selected value={res}>{res}</option> : <option value={res}>{res}</option>
+          {dates.slice(0).reverse().map((res, i)=>(
+            <option value={res}>{res}</option>
           ))}
         </select>
         </div>
